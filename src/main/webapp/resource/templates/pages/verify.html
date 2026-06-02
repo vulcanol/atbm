@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header}">
+    <title>Xác minh chữ ký – KýSốPDF</title>
+</head>
+<body>
+<div class="app-layout">
+
+    <div th:replace="~{fragments/sidebar :: sidebar('verify')}"></div>
+
+    <div class="main-content">
+        <header class="main-header">
+            <div class="header-title">Xác minh chữ ký</div>
+            <div class="header-greeting">
+                Xin chào, <strong th:text="${userName}">User</strong>
+            </div>
+        </header>
+
+        <div class="page-content">
+
+            <div th:if="${success}" class="alert alert-success"
+                 style="font-size:15px; font-weight:600;" th:text="${success}"></div>
+            <div th:if="${error}" class="alert alert-danger"
+                 style="font-size:15px; font-weight:600;" th:text="${error}"></div>
+
+            <!-- Verify form -->
+            <div class="card mb-6">
+                <div class="card-title">Xác minh tính hợp lệ của chữ ký số</div>
+
+                <p style="font-size:13px; color:var(--text-sub); margin-bottom:20px;">
+                    Cung cấp file PDF gốc, chữ ký số và khoá công khai.
+                    Kết quả cho biết tài liệu có bị thay đổi sau khi ký không.
+                </p>
+
+                <form action="/sign/do-verify" method="post" enctype="multipart/form-data" id="verifyForm">
+
+                    <div class="form-group">
+                        <label class="form-label">File PDF cần xác minh</label>
+                        <div class="file-drop" id="verifyFileDrop">
+                            <input type="file" name="file" id="verifyPdfFile"
+                                   accept=".pdf" onchange="updateVerifyFileName(this)">
+                            <div class="file-drop-icon">
+                                <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+                            </div>
+                            <div class="file-drop-title">Kéo thả hoặc <strong>chọn file PDF</strong></div>
+                            <div class="file-drop-sub">File PDF gốc cần xác minh</div>
+                            <div id="verifyFileName" style="margin-top:10px; font-size:13px; color:var(--primary); font-weight:600; display:none;"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="signatureBase64">Chữ ký số (Base64)</label>
+                        <textarea id="signatureBase64" name="signatureBase64" class="form-control"
+                                  placeholder="Dán chuỗi chữ ký số Base64 vào đây..."
+                                  style="min-height:110px;"></textarea>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom:20px;">
+                        <label class="form-label" for="publicKeyBase64">Khoá công khai (Base64)</label>
+                        <textarea id="publicKeyBase64" name="publicKeyBase64" class="form-control"
+                                  placeholder="Dán chuỗi khoá công khai Base64 vào đây..."
+                                  style="min-height:110px;"></textarea>
+                    </div>
+
+                    <button type="submit" id="verifyBtn" class="btn btn-success"
+                            style="width:100%; font-size:15px; padding:13px;">
+                        Xác minh chữ ký
+                    </button>
+                </form>
+            </div>
+
+            <!-- Guide -->
+            <div class="card">
+                <div class="card-title">Hướng dẫn</div>
+                <div class="grid-2">
+                    <div>
+                        <p style="font-size:12px; font-weight:700; color:var(--primary); text-transform:uppercase; letter-spacing:0.6px; margin-bottom:12px;">Lấy chữ ký số</p>
+                        <ol style="font-size:13px; color:var(--text-sub); padding-left:18px; line-height:2.2;">
+                            <li>Ký số tài liệu tại trang <a href="/sign" style="color:var(--primary);">Ký số</a></li>
+                            <li>Xem chi tiết tài liệu → Sao chép chữ ký Base64</li>
+                        </ol>
+                    </div>
+                    <div>
+                        <p style="font-size:12px; font-weight:700; color:var(--success); text-transform:uppercase; letter-spacing:0.6px; margin-bottom:12px;">Lấy khoá công khai</p>
+                        <ol style="font-size:13px; color:var(--text-sub); padding-left:18px; line-height:2.2;">
+                            <li>Vào trang <a href="/keys" style="color:var(--primary);">Quản lý khoá RSA</a></li>
+                            <li>Nhấn "Sao chép Public Key" và dán vào đây</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="info-box" style="margin-top:16px;">
+                    <strong>Thuật toán xác minh:</strong>&nbsp;
+                    hash' = SHA-256(PDF) &nbsp;|&nbsp;
+                    hash = Decrypt(signature, publicKey) &nbsp;|&nbsp;
+                    Kết quả: hash == hash'
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+function updateVerifyFileName(input) {
+    const el = document.getElementById('verifyFileName');
+    if (input.files && input.files[0]) {
+        el.textContent = input.files[0].name;
+        el.style.display = 'block';
+    }
+}
+document.getElementById('verifyForm').addEventListener('submit', function() {
+    const btn = document.getElementById('verifyBtn');
+    btn.textContent = 'Đang xác minh...';
+    btn.disabled = true;
+});
+const drop = document.getElementById('verifyFileDrop');
+['dragenter','dragover'].forEach(e => drop.addEventListener(e, ev => { ev.preventDefault(); drop.classList.add('dragover'); }));
+['dragleave','drop'].forEach(e => drop.addEventListener(e, ev => { ev.preventDefault(); drop.classList.remove('dragover'); }));
+drop.addEventListener('drop', ev => {
+    const f = ev.dataTransfer.files[0];
+    if (f) { document.getElementById('verifyPdfFile').files = ev.dataTransfer.files; updateVerifyFileName({files:[f]}); }
+});
+</script>
+</body>
+</html>

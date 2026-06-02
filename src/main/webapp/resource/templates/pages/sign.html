@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header}">
+    <title>Ký số tài liệu – KýSốPDF</title>
+</head>
+<body>
+<div class="app-layout">
+
+    <div th:replace="~{fragments/sidebar :: sidebar('sign')}"></div>
+
+    <div class="main-content">
+        <header class="main-header">
+            <div class="header-title">Ký số tài liệu</div>
+            <div class="header-greeting">
+                Xin chào, <strong th:text="${userName}">User</strong>
+            </div>
+        </header>
+
+        <div class="page-content">
+
+            <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+            <div th:if="${error}"   class="alert alert-danger"  th:text="${error}"></div>
+
+            <div th:unless="${hasKey}" class="alert alert-warning">
+                Bạn chưa có cặp khoá RSA.
+                <a href="/keys" style="color:var(--primary); font-weight:600;">Tạo khoá ngay</a>
+            </div>
+
+            <div class="card mb-6">
+                <div class="card-title">Thực hiện ký số</div>
+
+                <p style="font-size:13px; color:var(--text-sub); margin-bottom:20px;">
+                    Chọn tài liệu PDF cần ký. Hệ thống tính hash <strong>SHA-256</strong>
+                    rồi mã hoá bằng <strong>Private Key RSA</strong> của bạn để tạo chữ ký số.
+                </p>
+
+                <div th:if="${documents == null or #lists.isEmpty(documents)}" class="empty-state">
+                    <div class="empty-icon">
+                        <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z"/></svg>
+                    </div>
+                    <h3>Chưa có tài liệu</h3>
+                    <p>Upload tài liệu PDF trước khi thực hiện ký số</p>
+                    <a href="/documents" class="btn btn-primary">Upload tài liệu</a>
+                </div>
+
+                <div th:if="${documents != null and !#lists.isEmpty(documents)}">
+                    <div class="info-box" style="margin-bottom:18px;">
+                        Thuật toán: <strong>SHA256withRSA</strong> &nbsp;|&nbsp;
+                        Signature = RSA_Encrypt( SHA256(PDF_bytes), Private_Key )
+                    </div>
+
+                    <form action="/sign/do-sign" method="post" id="signForm">
+                        <div class="form-group">
+                            <label class="form-label" for="documentId">Chọn tài liệu cần ký</label>
+                            <select name="documentId" id="documentId" class="form-control">
+                                <option value="">-- Chọn tài liệu PDF --</option>
+                                <option th:each="doc : ${documents}"
+                                        th:value="${doc.id}"
+                                        th:text="${doc.fileName + '  (' + #temporals.format(doc.uploadedAt,'dd/MM/yyyy HH:mm') + ')'}">
+                                    document.pdf
+                                </option>
+                            </select>
+                        </div>
+                        <button type="submit" id="signBtn" class="btn btn-primary"
+                                style="width:100%;" th:disabled="${!hasKey}">
+                            Thực hiện ký số
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Steps -->
+            <div class="card">
+                <div class="card-title">Quy trình ký số</div>
+                <div class="step-grid">
+                    <div class="step-card">
+                        <div class="step-num">1</div>
+                        <h4>Đọc file PDF</h4>
+                        <p>Lấy toàn bộ bytes nội dung</p>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-num">2</div>
+                        <h4>Tính SHA-256</h4>
+                        <p>Hash 32 bytes = 256 bits</p>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-num">3</div>
+                        <h4>Mã hoá RSA</h4>
+                        <p>Encrypt(hash, Private Key)</p>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-num">4</div>
+                        <h4>Lưu chữ ký</h4>
+                        <p>Base64(signature) → Database</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('signForm')?.addEventListener('submit', function(e) {
+    if (!document.getElementById('documentId').value) {
+        e.preventDefault();
+        alert('Vui lòng chọn tài liệu cần ký!');
+        return;
+    }
+    const btn = document.getElementById('signBtn');
+    btn.textContent = 'Đang ký số...';
+    btn.disabled = true;
+});
+</script>
+</body>
+</html>

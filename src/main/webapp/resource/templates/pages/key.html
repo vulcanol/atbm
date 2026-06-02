@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header}">
+    <title>Quản lý khoá RSA – KýSốPDF</title>
+</head>
+<body>
+<div class="app-layout">
+
+    <div th:replace="~{fragments/sidebar :: sidebar('keys')}"></div>
+
+    <div class="main-content">
+        <header class="main-header">
+            <div class="header-title">Quản lý khoá RSA</div>
+            <div class="header-greeting">
+                Xin chào, <strong th:text="${userName}">User</strong>
+            </div>
+        </header>
+
+        <div class="page-content">
+
+            <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+            <div th:if="${error}"   class="alert alert-danger"  th:text="${error}"></div>
+
+            <div class="grid-2" style="align-items:start;">
+
+                <!-- Generate Key -->
+                <div class="card">
+                    <div class="card-title">Tạo cặp khoá RSA mới</div>
+
+                    <div class="alert alert-warning" style="margin-bottom:18px;">
+                        Tạo khoá mới sẽ thay thế cặp khoá hiện tại. Chữ ký cũ cần khoá cũ để xác minh.
+                    </div>
+
+                    <form action="/keys/generate" method="post">
+                        <div class="form-group">
+                            <label class="form-label">Kích thước khoá (bit)</label>
+                            <div class="key-size-grid">
+                                <div class="key-size-option">
+                                    <input type="radio" name="keySize" id="key1024" value="1024">
+                                    <label class="key-size-label" for="key1024">
+                                        <span class="ks-num">1024</span>
+                                        <span class="ks-sub">Nhanh</span>
+                                    </label>
+                                </div>
+                                <div class="key-size-option">
+                                    <input type="radio" name="keySize" id="key2048" value="2048" checked>
+                                    <label class="key-size-label" for="key2048">
+                                        <span class="ks-num">2048</span>
+                                        <span class="ks-sub">Tiêu chuẩn</span>
+                                    </label>
+                                </div>
+                                <div class="key-size-option">
+                                    <input type="radio" name="keySize" id="key4096" value="4096">
+                                    <label class="key-size-label" for="key4096">
+                                        <span class="ks-num">4096</span>
+                                        <span class="ks-sub">Mạnh</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" id="generateKeyBtn" class="btn btn-primary"
+                                style="width:100%;">
+                            Tạo cặp khoá RSA
+                        </button>
+                    </form>
+
+                    <div class="info-box" style="margin-top:14px;">
+                        Thuật toán: <strong>RSA</strong> với hàm băm <strong>SHA-256</strong>.
+                        Kích thước 2048-bit là tiêu chuẩn công nghiệp hiện tại.
+                    </div>
+                </div>
+
+                <!-- Current Key -->
+                <div class="card">
+                    <div class="card-title">Cặp khoá hiện tại</div>
+
+                    <!-- Has Key -->
+                    <div th:if="${keyPair}">
+                        <div style="display:flex; gap:8px; margin-bottom:18px; flex-wrap:wrap;">
+                            <span class="badge badge-success">Đã có khoá</span>
+                            <span class="badge badge-primary">RSA-<span th:text="${keyPair.keySize}">2048</span> bit</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Khoá công khai (Public Key)</label>
+                            <div class="key-box" id="publicKeyFull" th:text="${keyPair.publicKey}">--</div>
+                            <button class="btn btn-ghost btn-sm" style="margin-top:8px;"
+                                    onclick="copyToClipboard('publicKeyFull', this)">
+                                Sao chép Public Key
+                            </button>
+                        </div>
+
+                        <div class="form-group">
+                            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+                                <label class="form-label" style="margin:0;">Khoá riêng tư (Private Key)</label>
+                                <span class="badge badge-danger">Bí mật</span>
+                            </div>
+                            <div id="privateKeyBox" style="display:none;" class="key-box"
+                                 th:text="${keyPair.privateKey}">--</div>
+                            <div id="privateKeyPlaceholder"
+                                 style="background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:12px; font-size:13px; color:var(--text-muted); text-align:center;">
+                                Khoá riêng tư được ẩn để bảo mật
+                            </div>
+                            <button class="btn btn-ghost btn-sm" id="togglePrivateKeyBtn"
+                                    style="margin-top:8px;" onclick="togglePrivateKey()">
+                                Hiển thị khoá riêng tư
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- No Key -->
+                    <div th:unless="${keyPair}" class="empty-state">
+                        <div class="empty-icon">
+                            <svg viewBox="0 0 24 24"><path d="M12.65 10C11.83 7.67 9.61 6 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6c2.61 0 4.83-1.67 5.65-4H17v4h4v-4h2v-4H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/></svg>
+                        </div>
+                        <h3>Chưa có cặp khoá</h3>
+                        <p>Tạo cặp khoá RSA để bắt đầu ký số tài liệu</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function copyToClipboard(elementId, btn) {
+    const text = document.getElementById(elementId).textContent.trim();
+    navigator.clipboard.writeText(text).then(() => {
+        const orig = btn.textContent;
+        btn.textContent = 'Đã sao chép!';
+        setTimeout(() => btn.textContent = orig, 2000);
+    });
+}
+function togglePrivateKey() {
+    const box = document.getElementById('privateKeyBox');
+    const ph  = document.getElementById('privateKeyPlaceholder');
+    const btn = document.getElementById('togglePrivateKeyBtn');
+    const hidden = box.style.display === 'none';
+    box.style.display  = hidden ? 'block' : 'none';
+    ph.style.display   = hidden ? 'none'  : 'block';
+    btn.textContent    = hidden ? 'Ẩn khoá riêng tư' : 'Hiển thị khoá riêng tư';
+}
+</script>
+</body>
+</html>

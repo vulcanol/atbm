@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header}">
+    <title>Bảng điều khiển – KýSốPDF</title>
+</head>
+<body>
+<div class="app-layout">
+
+    <div th:replace="~{fragments/sidebar :: sidebar('dashboard')}"></div>
+
+    <div class="main-content">
+        <header class="main-header">
+            <div class="header-title">Bảng điều khiển</div>
+            <div class="header-greeting">
+                Xin chào, <strong th:text="${userName}">User</strong>
+            </div>
+        </header>
+
+        <div class="page-content">
+
+            <!-- Welcome banner -->
+            <div class="card mb-6" style="border-left: 4px solid var(--primary); padding-left: 20px;">
+                <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px;">
+                    <div>
+                        <h2 style="font-size:18px; font-weight:800; color:var(--text); margin-bottom:6px;">
+                            Hệ thống Ký Số Tài Liệu PDF
+                        </h2>
+                        <p style="font-size:13px; color:var(--text-sub); max-width:540px; line-height:1.6;">
+                            Bảo vệ tính toàn vẹn tài liệu bằng thuật toán mã hoá
+                            <strong style="color:var(--primary);">RSA</strong> kết hợp hàm băm
+                            <strong style="color:var(--primary);">SHA-256</strong>.
+                            Chữ ký số là bằng chứng xác thực không thể làm giả.
+                        </p>
+                    </div>
+                    <a href="/documents" class="btn btn-primary">Bắt đầu ngay</a>
+                </div>
+            </div>
+
+            <!-- Quick actions -->
+            <div class="stats-grid">
+                <a href="/keys" class="stat-card">
+                    <div class="stat-icon blue">
+                        <svg viewBox="0 0 24 24"><path d="M12.65 10C11.83 7.67 9.61 6 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6c2.61 0 4.83-1.67 5.65-4H17v4h4v-4h2v-4H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/></svg>
+                    </div>
+                    <div>
+                        <div class="stat-value">Khoá RSA</div>
+                        <div class="stat-label">Tạo và quản lý cặp khoá</div>
+                    </div>
+                </a>
+
+                <a href="/documents" class="stat-card">
+                    <div class="stat-icon gray">
+                        <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z"/></svg>
+                    </div>
+                    <div>
+                        <div class="stat-value">Tài liệu</div>
+                        <div class="stat-label">Upload và quản lý PDF</div>
+                    </div>
+                </a>
+
+                <a href="/sign" class="stat-card">
+                    <div class="stat-icon blue">
+                        <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+                    </div>
+                    <div>
+                        <div class="stat-value">Ký số</div>
+                        <div class="stat-label">Ký tài liệu bằng RSA</div>
+                    </div>
+                </a>
+
+                <a href="/sign/verify" class="stat-card">
+                    <div class="stat-icon green">
+                        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+                    </div>
+                    <div>
+                        <div class="stat-value">Xác minh</div>
+                        <div class="stat-label">Kiểm tra chữ ký số</div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Algorithm explanation -->
+            <div class="card">
+                <div class="card-title">Quy trình hoạt động</div>
+                <div class="grid-2">
+                    <div>
+                        <p style="font-size:12px; font-weight:700; color:var(--primary); text-transform:uppercase; letter-spacing:0.6px; margin-bottom:12px;">Ký số tài liệu</p>
+                        <div class="process-item">
+                            <div class="process-num blue">1</div>
+                            <div>
+                                <h4>Upload tài liệu PDF</h4>
+                                <p>Hệ thống tính hash SHA-256 của toàn bộ nội dung file</p>
+                            </div>
+                        </div>
+                        <div class="process-item">
+                            <div class="process-num blue">2</div>
+                            <div>
+                                <h4>Tạo cặp khoá RSA</h4>
+                                <p>Sinh Public Key và Private Key (1024 / 2048 / 4096 bit)</p>
+                            </div>
+                        </div>
+                        <div class="process-item">
+                            <div class="process-num blue">3</div>
+                            <div>
+                                <h4>Ký số = RSA(SHA256(PDF), PrivateKey)</h4>
+                                <p>Tạo chữ ký số duy nhất, lưu vào cơ sở dữ liệu</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <p style="font-size:12px; font-weight:700; color:var(--success); text-transform:uppercase; letter-spacing:0.6px; margin-bottom:12px;">Xác minh chữ ký</p>
+                        <div class="process-item">
+                            <div class="process-num green">1</div>
+                            <div>
+                                <h4>Tính lại hash SHA-256 của PDF</h4>
+                                <p>Hash' = SHA-256(nội dung PDF nhận được)</p>
+                            </div>
+                        </div>
+                        <div class="process-item">
+                            <div class="process-num green">2</div>
+                            <div>
+                                <h4>Giải mã chữ ký bằng Public Key</h4>
+                                <p>Hash = RSA_Decrypt(Signature, PublicKey)</p>
+                            </div>
+                        </div>
+                        <div class="process-item">
+                            <div class="process-num green">3</div>
+                            <div>
+                                <h4>So sánh Hash == Hash'</h4>
+                                <p>Khớp → Hợp lệ &nbsp;|&nbsp; Không khớp → Đã bị chỉnh sửa</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="header">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle != null ? pageTitle + ' – KýSốPDF' : 'KýSốPDF'}">KýSốPDF</title>
+    <meta name="description" content="Hệ thống ký số tài liệu PDF sử dụng RSA và SHA-256">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+</html>

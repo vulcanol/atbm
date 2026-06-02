@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header}">
+    <title>Tài liệu PDF – KýSốPDF</title>
+</head>
+<body>
+<div class="app-layout">
+
+    <div th:replace="~{fragments/sidebar :: sidebar('documents')}"></div>
+
+    <div class="main-content">
+        <header class="main-header">
+            <div class="header-title">Tài liệu PDF</div>
+            <div class="header-greeting">
+                Xin chào, <strong th:text="${userName}">User</strong>
+            </div>
+        </header>
+
+        <div class="page-content">
+
+            <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+            <div th:if="${error}"   class="alert alert-danger"  th:text="${error}"></div>
+
+            <!-- Upload -->
+            <div class="card mb-6">
+                <div class="card-title">Upload tài liệu PDF</div>
+
+                <form action="/documents/upload" method="post" enctype="multipart/form-data" id="uploadForm">
+                    <div class="file-drop" id="fileDrop">
+                        <input type="file" name="file" id="pdfFile"
+                               accept=".pdf" onchange="updateFileName(this)">
+                        <div class="file-drop-icon">
+                            <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6zm6-8v4h-2v-4H8l4-4 4 4h-2z"/></svg>
+                        </div>
+                        <div class="file-drop-title">Kéo thả file PDF hoặc <strong>chọn file</strong></div>
+                        <div class="file-drop-sub">Chỉ chấp nhận file PDF · Tối đa 20MB</div>
+                        <div id="selectedFileName" style="margin-top:10px; font-size:13px; color:var(--primary); font-weight:600; display:none;"></div>
+                    </div>
+
+                    <button type="submit" id="uploadBtn" class="btn btn-primary"
+                            style="margin-top:14px; width:100%;">
+                        Upload tài liệu
+                    </button>
+                </form>
+            </div>
+
+            <!-- Document list -->
+            <div class="card">
+                <div class="card-title" style="display:flex; align-items:center; justify-content:space-between;">
+                    <span>Danh sách tài liệu</span>
+                    <span th:if="${documents}" class="badge badge-primary"
+                          th:text="${#lists.size(documents)} + ' tài liệu'">0</span>
+                </div>
+
+                <div th:if="${documents != null and !#lists.isEmpty(documents)}">
+                    <div class="table-wrapper">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Tên tài liệu</th>
+                                <th>Hash SHA-256</th>
+                                <th>Ngày upload</th>
+                                <th>Thao tác</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="doc, stat : ${documents}">
+                                <td style="color:var(--text-muted); font-size:12px;"
+                                    th:text="${stat.index + 1}">1</td>
+                                <td>
+                                    <span style="font-weight:600; color:var(--text);"
+                                          th:text="${doc.fileName}">file.pdf</span>
+                                </td>
+                                <td>
+                                    <div class="hash-value"
+                                         th:text="${#strings.substring(doc.hashValue, 0, 20) + '...'}"
+                                         th:title="${doc.hashValue}">abc...</div>
+                                </td>
+                                <td style="font-size:13px; color:var(--text-sub);"
+                                    th:text="${#temporals.format(doc.uploadedAt, 'dd/MM/yyyy HH:mm')}">
+                                    01/01/2024
+                                </td>
+                                <td>
+                                    <div style="display:flex; gap:8px;">
+                                        <a th:href="@{/documents/download/{id}(id=${doc.id})}"
+                                           class="btn btn-ghost btn-sm">Tải về</a>
+                                        <a th:href="@{/sign}" class="btn btn-outline btn-sm">Ký số</a>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div th:if="${documents == null or #lists.isEmpty(documents)}" class="empty-state">
+                    <div class="empty-icon">
+                        <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z"/></svg>
+                    </div>
+                    <h3>Chưa có tài liệu nào</h3>
+                    <p>Upload tài liệu PDF đầu tiên để bắt đầu ký số</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+function updateFileName(input) {
+    const el = document.getElementById('selectedFileName');
+    if (input.files && input.files[0]) {
+        el.textContent = input.files[0].name;
+        el.style.display = 'block';
+    }
+}
+const drop = document.getElementById('fileDrop');
+['dragenter','dragover'].forEach(e => drop.addEventListener(e, ev => { ev.preventDefault(); drop.classList.add('dragover'); }));
+['dragleave','drop'].forEach(e => drop.addEventListener(e, ev => { ev.preventDefault(); drop.classList.remove('dragover'); }));
+drop.addEventListener('drop', ev => {
+    const f = ev.dataTransfer.files[0];
+    if (f) { document.getElementById('pdfFile').files = ev.dataTransfer.files; updateFileName({files:[f]}); }
+});
+</script>
+</body>
+</html>

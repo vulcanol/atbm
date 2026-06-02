@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập – KýSốPDF</title>
+    <meta name="description" content="Đăng nhập vào hệ thống ký số tài liệu PDF">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="auth-page">
+    <div class="auth-container">
+
+        <!-- Brand -->
+        <div class="auth-brand">
+            <div class="brand-logo">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M18 8h-1V6A5 5 0 0 0 7 6v2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2zM9 6a3 3 0 0 1 6 0v2H9V6zm9 14H6V10h12v10zm-6-3a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/>
+                </svg>
+            </div>
+            <h1>KýSốPDF</h1>
+            <p>Hệ thống ký số tài liệu an toàn</p>
+        </div>
+
+        <!-- Card -->
+        <div class="auth-card">
+
+            <!-- Flash messages -->
+            <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+            <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+
+            <form action="/login" method="post">
+                <div class="form-group">
+                    <label class="form-label" for="email">Email</label>
+                    <input type="email" id="email" name="email" class="form-control"
+                           placeholder="Nhập địa chỉ email" required autocomplete="email">
+                </div>
+                <div class="form-group" style="margin-bottom:20px;">
+                    <label class="form-label" for="password">Mật khẩu</label>
+                    <input type="password" id="password" name="password" class="form-control"
+                           placeholder="Nhập mật khẩu" required autocomplete="current-password">
+                </div>
+                <button type="submit" id="loginBtn" class="btn btn-primary btn-lg">
+                    Đăng nhập
+                </button>
+            </form>
+
+            <div class="auth-divider">hoặc</div>
+
+            <div class="auth-footer">
+                Chưa có tài khoản?
+                <a href="/register">Tạo tài khoản mới</a>
+            </div>
+        </div>
+
+        <p style="margin-top:20px; font-size:12px; color:var(--text-muted); text-align:center;">
+            Thuật toán RSA + SHA-256 &nbsp;·&nbsp; Bảo mật cấp độ cao
+        </p>
+    </div>
+</div>
+</body>
+</html>
