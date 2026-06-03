@@ -11,6 +11,7 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.ATBMTT.model.KeyPair;
 import com.example.ATBMTT.model.User;
@@ -25,10 +26,8 @@ public class KeyService {
     /**
      * Sinh cặp khoá RSA với kích thước keySize (1024, 2048, 4096)
      */
+    @Transactional
     public KeyPair generateKeyPair(User user, int keySize) throws Exception {
-        // Xoá cặp khoá cũ nếu có
-        keyPairRepository.findByUser(user).ifPresent(keyPairRepository::delete);
-
         KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
         generator.initialize(keySize);
         java.security.KeyPair rsaKeyPair = generator.generateKeyPair();
@@ -38,11 +37,21 @@ public class KeyService {
         String privateKeyBase64 = Base64.getEncoder().encodeToString(
                 rsaKeyPair.getPrivate().getEncoded());
 
-        KeyPair keyPair = new KeyPair();
-        keyPair.setPublicKey(publicKeyBase64);
-        keyPair.setPrivateKey(privateKeyBase64);
-        keyPair.setKeySize(keySize);
-        keyPair.setUser(user);
+        // Cập nhật cặp khoá cũ nếu có (giữ nguyên ID để không phá vỡ FK từ signatures)
+        Optional<KeyPair> existingOpt = keyPairRepository.findByUser(user);
+        KeyPair keyPair;
+        if (existingOpt.isPresent()) {
+            keyPair = existingOpt.get();
+            keyPair.setPublicKey(publicKeyBase64);
+            keyPair.setPrivateKey(privateKeyBase64);
+            keyPair.setKeySize(keySize);
+        } else {
+            keyPair = new KeyPair();
+            keyPair.setPublicKey(publicKeyBase64);
+            keyPair.setPrivateKey(privateKeyBase64);
+            keyPair.setKeySize(keySize);
+            keyPair.setUser(user);
+        }
 
         return keyPairRepository.save(keyPair);
     }

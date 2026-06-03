@@ -868,11 +868,137 @@ textarea.form-control {
 
 .logout-link svg { width: 16px; height: 16px; fill: var(--danger); }
 
+/* ---------- DOCUMENT DETAIL ---------- */
+.detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.detail-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+}
+
+.detail-icon {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+
+.detail-icon svg { width: 20px; height: 20px; }
+.detail-icon.blue   { background: var(--primary-light); }
+.detail-icon.blue svg { fill: var(--primary); }
+.detail-icon.green  { background: var(--success-light); }
+.detail-icon.green svg { fill: var(--success); }
+.detail-icon.gray   { background: #eef0f3; }
+.detail-icon.gray svg { fill: var(--text-sub); }
+
+.detail-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+}
+
+.detail-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+/* Hash / Signature display box */
+.hash-display-box {
+    position: relative;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+    padding-right: 120px;
+}
+
+.hash-display-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+}
+
+.hash-display-value {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    color: var(--primary);
+    word-break: break-all;
+    line-height: 1.8;
+    font-weight: 600;
+}
+
+.hash-display-value.signature-val {
+    max-height: 120px;
+    overflow-y: auto;
+    font-size: 11px;
+    color: var(--text-sub);
+}
+
+/* Copy button */
+.btn-copy {
+    position: absolute;
+    top: 12px; right: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 7px 14px;
+    background: var(--bg-white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-sub);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: all var(--transition);
+}
+
+.btn-copy svg {
+    width: 14px; height: 14px;
+    fill: var(--text-sub);
+    transition: fill var(--transition);
+}
+
+.btn-copy:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: var(--primary-light);
+}
+
+.btn-copy:hover svg { fill: var(--primary); }
+
+.btn-copy.copied {
+    border-color: var(--success);
+    color: var(--success);
+    background: var(--success-light);
+}
+
+.btn-copy.copied svg { fill: var(--success); }
+
 /* ---------- RESPONSIVE ---------- */
 @media (max-width: 768px) {
     .sidebar { display: none; }
     .main-content { margin-left: 0; }
     .grid-2 { grid-template-columns: 1fr; }
+    .detail-grid { grid-template-columns: 1fr; }
     .page-content { padding: 16px; }
     .stats-grid { grid-template-columns: 1fr 1fr; }
+    .hash-display-box { padding-right: 16px; }
+    .btn-copy { position: static; margin-top: 10px; }
 }

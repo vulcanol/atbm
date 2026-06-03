@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header}">
+    <title>Chi tiết tài liệu – KýSốPDF</title>
+</head>
+<body>
+<div class="app-layout">
+
+    <div th:replace="~{fragments/sidebar :: sidebar('documents')}"></div>
+
+    <div class="main-content">
+        <header class="main-header">
+            <div class="header-title">Chi tiết tài liệu</div>
+            <div class="header-greeting">
+                Xin chào, <strong th:text="${userName}">User</strong>
+            </div>
+        </header>
+
+        <div class="page-content">
+
+            <!-- Breadcrumb -->
+            <div style="margin-bottom:18px;">
+                <a href="/documents" style="font-size:13px; color:#1877f2; text-decoration:none; font-weight:600;">
+                    &#8592; Quay lại danh sách tài liệu
+                </a>
+            </div>
+
+            <!-- Document Info Card -->
+            <div class="card mb-6">
+                <div class="card-title" style="display:flex; align-items:center; justify-content:space-between;">
+                    <span>Thông tin tài liệu</span>
+                    <span th:if="${isSigned}" class="badge badge-success">Đã ký số</span>
+                    <span th:unless="${isSigned}" class="badge badge-gray">Chưa ký số</span>
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+                    <div style="display:flex; align-items:center; gap:12px; padding:14px; background:#f0f2f5; border:1px solid #dddfe2; border-radius:6px;">
+                        <div style="width:36px; height:36px; min-width:36px; background:#e7f0fd; border-radius:8px; display:flex; align-items:center; justify-content:center;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="#1877f2"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z"/></svg>
+                        </div>
+                        <div style="min-width:0;">
+                            <div style="font-size:11px; font-weight:600; color:#8a8d91; text-transform:uppercase; letter-spacing:0.5px;">Tên tài liệu</div>
+                            <div style="font-size:14px; font-weight:600; color:#1c1e21; overflow-wrap:break-word; word-break:break-all;" th:text="${document.fileName}">file.pdf</div>
+                        </div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:12px; padding:14px; background:#f0f2f5; border:1px solid #dddfe2; border-radius:6px;">
+                        <div style="width:36px; height:36px; min-width:36px; background:#eef0f3; border-radius:8px; display:flex; align-items:center; justify-content:center;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="#65676b"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z"/></svg>
+                        </div>
+                        <div style="min-width:0;">
+                            <div style="font-size:11px; font-weight:600; color:#8a8d91; text-transform:uppercase; letter-spacing:0.5px;">Ngày upload</div>
+                            <div style="font-size:14px; font-weight:600; color:#1c1e21;" th:text="${#temporals.format(document.uploadedAt, 'dd/MM/yyyy HH:mm:ss')}">01/01/2024</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SHA-256 Hash Card -->
+            <div class="card mb-6">
+                <div class="card-title">Hash SHA-256</div>
+
+                <p style="font-size:13px; color:#65676b; margin-bottom:14px;">
+                    Giá trị hash SHA-256 được tính từ toàn bộ nội dung file PDF khi upload.
+                    Dùng để xác minh tính toàn vẹn của tài liệu.
+                </p>
+
+                <div style="position:relative; background:#f0f2f5; border:1px solid #dddfe2; border-radius:6px; padding:14px 16px;">
+                    <div style="font-size:11px; font-weight:600; color:#8a8d91; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px;">SHA-256 HASH</div>
+                    <div id="hashValue"
+                         style="font-family:'Courier New',monospace; font-size:12px; color:#1877f2; font-weight:600; word-break:break-all; overflow-wrap:break-word; line-height:1.8; padding-right:90px;"
+                         th:text="${document.hashValue}">abc123...</div>
+                    <button type="button" onclick="copyToClipboard('hashValue', this)"
+                            style="position:absolute; top:12px; right:12px; display:inline-flex; align-items:center; gap:5px; padding:6px 12px; background:#fff; border:1px solid #dddfe2; border-radius:6px; color:#65676b; font-size:12px; font-weight:600; cursor:pointer; font-family:inherit;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="#65676b"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+                        <span>Sao chép</span>
+                    </button>
+                </div>
+
+                <div class="info-box" style="margin-top:14px;">
+                    <strong>Lưu ý:</strong> Nếu nội dung file PDF bị thay đổi dù chỉ 1 bit, hash SHA-256 sẽ hoàn toàn khác.
+                </div>
+            </div>
+
+            <!-- Signature Card -->
+            <div class="card mb-6">
+                <div class="card-title" style="display:flex; align-items:center; justify-content:space-between;">
+                    <span>Chữ ký số</span>
+                    <span th:if="${signature != null}" class="badge badge-success">Đã ký</span>
+                    <span th:if="${signature == null}" class="badge badge-gray">Chưa ký</span>
+                </div>
+
+                <!-- Khi chưa có chữ ký -->
+                <div th:if="${signature == null}" style="text-align:center; padding:30px 20px; color:#8a8d91;">
+                    <div style="width:48px; height:48px; border-radius:50%; background:#f0f2f5; border:1px solid #dddfe2; display:flex; align-items:center; justify-content:center; margin:0 auto 14px;">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="#8a8d91"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+                    </div>
+                    <h3 style="font-size:15px; font-weight:700; color:#1c1e21; margin-bottom:6px;">Tài liệu chưa được ký số</h3>
+                    <p style="font-size:13px; color:#65676b; margin-bottom:18px;">Ký số tài liệu này để tạo chữ ký số bảo mật</p>
+                    <a href="/sign" class="btn btn-primary">Đi tới trang Ký số</a>
+                </div>
+
+                <!-- Khi đã có chữ ký -->
+                <div th:if="${signature != null}">
+                    <!-- Metadata -->
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:16px;">
+                        <div style="display:flex; align-items:center; gap:12px; padding:12px 14px; background:#f0f2f5; border:1px solid #dddfe2; border-radius:6px;">
+                            <div style="width:32px; height:32px; min-width:32px; background:#eafaf3; border-radius:8px; display:flex; align-items:center; justify-content:center;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="#42b883"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+                            </div>
+                            <div style="min-width:0;">
+                                <div style="font-size:11px; font-weight:600; color:#8a8d91; text-transform:uppercase;">Thuật toán</div>
+                                <div style="font-size:13px; font-weight:600; color:#1c1e21;" th:text="${signature.algorithm}">SHA256withRSA</div>
+                            </div>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:12px; padding:12px 14px; background:#f0f2f5; border:1px solid #dddfe2; border-radius:6px;">
+                            <div style="width:32px; height:32px; min-width:32px; background:#eef0f3; border-radius:8px; display:flex; align-items:center; justify-content:center;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="#65676b"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z"/></svg>
+                            </div>
+                            <div style="min-width:0;">
+                                <div style="font-size:11px; font-weight:600; color:#8a8d91; text-transform:uppercase;">Ngày ký</div>
+                                <div style="font-size:13px; font-weight:600; color:#1c1e21;" th:text="${#temporals.format(signature.signedAt, 'dd/MM/yyyy HH:mm:ss')}">01/01/2024</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Signature value -->
+                    <div style="position:relative; background:#f0f2f5; border:1px solid #dddfe2; border-radius:6px; padding:14px 16px; margin-bottom:14px;">
+                        <div style="font-size:11px; font-weight:600; color:#8a8d91; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px;">CHỮ KÝ SỐ (BASE64)</div>
+                        <div id="signatureValue"
+                             style="font-family:'Courier New',monospace; font-size:11px; color:#65676b; word-break:break-all; overflow-wrap:break-word; line-height:1.7; max-height:100px; overflow-y:auto; padding-right:90px;"
+                             th:text="${signature.signatureValue}">base64...</div>
+                        <button type="button" onclick="copyToClipboard('signatureValue', this)"
+                                style="position:absolute; top:12px; right:12px; display:inline-flex; align-items:center; gap:5px; padding:6px 12px; background:#fff; border:1px solid #dddfe2; border-radius:6px; color:#65676b; font-size:12px; font-weight:600; cursor:pointer; font-family:inherit;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="#65676b"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+                            <span>Sao chép</span>
+                        </button>
+                    </div>
+
+                    <!-- Public Key -->
+                    <div th:if="${publicKey != null}" style="position:relative; background:#f0f2f5; border:1px solid #dddfe2; border-radius:6px; padding:14px 16px;">
+                        <div style="font-size:11px; font-weight:600; color:#8a8d91; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px;">KHOÁ CÔNG KHAI (BASE64)</div>
+                        <div id="publicKeyValue"
+                             style="font-family:'Courier New',monospace; font-size:11px; color:#65676b; word-break:break-all; overflow-wrap:break-word; line-height:1.7; max-height:100px; overflow-y:auto; padding-right:90px;"
+                             th:text="${publicKey}">base64...</div>
+                        <button type="button" onclick="copyToClipboard('publicKeyValue', this)"
+                                style="position:absolute; top:12px; right:12px; display:inline-flex; align-items:center; gap:5px; padding:6px 12px; background:#fff; border:1px solid #dddfe2; border-radius:6px; color:#65676b; font-size:12px; font-weight:600; cursor:pointer; font-family:inherit;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="#65676b"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+                            <span>Sao chép</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Verify Guide -->
+            <div class="card" th:if="${signature != null}">
+                <div class="card-title">Hướng dẫn xác minh nhanh</div>
+                <div class="step-grid" style="margin-bottom:18px;">
+                    <div class="step-card">
+                        <div class="step-num" style="background:#1877f2; width:28px; height:28px; border-radius:50%; color:#fff; font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; margin:0 auto 10px;">1</div>
+                        <h4 style="font-size:13px; font-weight:600; margin-bottom:4px;">Sao chép chữ ký</h4>
+                        <p style="font-size:11px; color:#8a8d91;">Nhấn "Sao chép" ở mục chữ ký phía trên</p>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-num" style="background:#1877f2; width:28px; height:28px; border-radius:50%; color:#fff; font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; margin:0 auto 10px;">2</div>
+                        <h4 style="font-size:13px; font-weight:600; margin-bottom:4px;">Sao chép Public Key</h4>
+                        <p style="font-size:11px; color:#8a8d91;">Nhấn "Sao chép" ở mục khoá công khai</p>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-num" style="background:#42b883; width:28px; height:28px; border-radius:50%; color:#fff; font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; margin:0 auto 10px;">3</div>
+                        <h4 style="font-size:13px; font-weight:600; margin-bottom:4px;">Xác minh</h4>
+                        <p style="font-size:11px; color:#8a8d91;">Dán vào trang <a href="/sign/verify" style="color:#1877f2;">Xác minh</a></p>
+                    </div>
+                </div>
+                <div style="text-align:center;">
+                    <a href="/sign/verify" class="btn btn-success" style="padding:12px 32px; font-size:15px;">
+                        Đi tới trang Xác minh chữ ký
+                    </a>
+                </div>
+            </div>
+
+            <!-- Action buttons -->
+            <div style="display:flex; gap:10px; margin-top:20px; flex-wrap:wrap;">
+                <a th:href="@{/documents/download/{id}(id=${document.id})}" class="btn btn-ghost">Tải về PDF</a>
+                <a href="/sign" class="btn btn-outline">Ký số tài liệu</a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+function copyToClipboard(elementId, btn) {
+    var text = document.getElementById(elementId).textContent.trim();
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(function() {
+            showCopied(btn);
+        });
+    } else {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        showCopied(btn);
+    }
+}
+function showCopied(btn) {
+    var span = btn.querySelector('span');
+    span.textContent = 'Đã sao chép!';
+    btn.style.borderColor = '#42b883';
+    btn.style.color = '#42b883';
+    setTimeout(function() {
+        span.textContent = 'Sao chép';
+        btn.style.borderColor = '#dddfe2';
+        btn.style.color = '#65676b';
+    }, 2000);
+}
+</script>
+</body>
+</html>
